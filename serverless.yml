@@ -19,7 +19,7 @@ provider:
 
 # 'custom' nos permite definir variables para reusar
 custom: # <--- NUEVO
-  bucketIngestaName: ${sls:stage}-ingesta-comentarios-joemir27 # <--- NUEVO
+  bucketIngestaName: ${sls:stage}-ingesta-comentarios-leonardomontesinos # <--- NUEVO
 
 functions:
   crear:
