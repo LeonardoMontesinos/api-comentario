@@ -1,4 +1,4 @@
-org: joemir27
+org: leonardomontesinos
 service: api-comentario
 
 provider:
@@ -7,7 +7,7 @@ provider:
   memorySize: 1024
   timeout: 20
   iam:
-    role: arn:aws:iam::245604380054:role/LabRole  
+    role: arn:aws:iam::088462649389:role/LabRole  
   
   # El stage se define para usarlo en las variables
   stage: ${opt:stage, 'dev'} # <--- NUEVO (Recomendado)
