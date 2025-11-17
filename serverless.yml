@@ -1,0 +1,64 @@
+org: joemir27
+service: api-comentario
+
+provider:
+  name: aws
+  runtime: python3.13 
+  memorySize: 1024
+  timeout: 20
+  iam:
+    role: arn:aws:iam::245604380054:role/LabRole  
+  
+  # El stage se define para usarlo en las variables
+  stage: ${opt:stage, 'dev'} # <--- NUEVO (Recomendado)
+
+  environment:
+    TABLE_NAME: ${sls:stage}-t_comentarios
+    # Pasamos el nombre del bucket a la Lambda
+    BUCKET_INGESTA_NAME: ${self:custom.bucketIngestaName} # <--- NUEVO
+
+# 'custom' nos permite definir variables para reusar
+custom: # <--- NUEVO
+  bucketIngestaName: ${sls:stage}-ingesta-comentarios-joemir27 # <--- NUEVO
+
+functions:
+  crear:
+    handler: comentario.lambda_handler
+    events:
+      - http:
+          path: /comentario/crear
+          method: post
+          cors: true
+          # Borramos 'integration: lambda' para usar el proxy por defecto
+          # integration: lambda # <--- BORRADO
+
+resources:
+  Resources:
+    # --- Tu tabla DynamoDB (sin cambios) ---
+    TablaComentarios:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: tenant_id
+            AttributeType: S
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: tenant_id
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+
+    # --- Bucket S3 de Ingesta (Ejercicio 5) ---
+    BucketIngesta: # <--- NUEVO
+      Type: AWS::S3::Bucket # <--- NUEVO
+      Properties: # <--- NUEVO
+        BucketName: ${self:custom.bucketIngestaName} # <--- NUEVO
+        # Buena práctica: Bloquear acceso público
+        PublicAccessBlockConfiguration: # <--- NUEVO
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
